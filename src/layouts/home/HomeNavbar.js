@@ -32,7 +32,7 @@ import MenuPopover from '../../components/MenuPopover';
 
 const MENU_LINKS = [
   { title: 'Home', icon: homeFill, href: '/' },
-  { title: 'Dashboard', icon: roundSpeed, href: PATH_HOME.dashboard }
+  { title: 'Go Test', icon: roundSpeed, href: PATH_HOME.dashboard }
 ];
 
 const APP_BAR_MOBILE = 64;

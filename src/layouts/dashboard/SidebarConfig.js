@@ -29,13 +29,8 @@ const sidebarConfig = [
         icon: ICONS.page
       },
       {
-        title: 'Page Two',
+        title: 'Read File And Analyse',
         href: PATH_DASHBOARD.general.pageTwo,
-        icon: ICONS.page
-      },
-      {
-        title: 'Page Three',
-        href: PATH_DASHBOARD.general.pageThree,
         icon: ICONS.page
       }
     ]
