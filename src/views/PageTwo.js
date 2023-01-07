@@ -29,6 +29,10 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     maxWidth: 345
+  },
+  overScroll: {
+    overflowY: 'scroll',
+    maxHeight: '500px'
   }
 }));
 
@@ -48,7 +52,8 @@ export default function PageTwo() {
   const [architecture, setArchitecture] = useState();
   const [totalFiles, setTotalFiles] = useState();
   const [totalAmountData, setTotalAmountData] = useState();
-  const [eachFileType, setEachFileType] = useState();
+  const [eachFileType, setEachFileType] = useState([]);
+  const [processing, setProcessing] = useState([]);
 
   const test = (e) => {
     console.log(e.target.files);
@@ -69,7 +74,10 @@ export default function PageTwo() {
     let startloadingdate = '';
     let totalfilenumber = 0;
     let totalfilesize = 0;
+    const processNumber = 0;
     const eachfiletype = [];
+    const processsRunning = [];
+    let processPidTemp = '';
     for (let i = 0; i < stateOptions.length; i += 1) {
       // get Last loading time
       if (stateOptions[i].includes('FINISHED LOGGING')) {
@@ -105,9 +113,13 @@ export default function PageTwo() {
         // what's left is seconds
         const seconds = delta % 60;
         console.log(hours);
-        setTakeTime(
-          `${days} Days ${hours} Hours ${minutes} Minutes ${seconds} Seconds`
-        );
+        let setTextTime = '';
+        if (days !== 0) setTextTime += `${days} Days `;
+        if (hours !== 0) setTextTime += `${hours} Hours `;
+        if (minutes !== 0) setTextTime += `${minutes} Minutes `;
+        setTextTime += `${seconds} Seconds`;
+
+        setTakeTime(setTextTime);
         loading = false;
       }
 
@@ -158,6 +170,16 @@ export default function PageTwo() {
         loading = true;
       }
 
+      // get Process Running
+      if (stateOptions[i].includes('--->PID:')) {
+        processPidTemp = stateOptions[i];
+      }
+
+      if (stateOptions[i].includes('RUNNING:') && processPidTemp !== '') {
+        console.log(processsRunning);
+        processsRunning.push({ pid: processPidTemp, running: stateOptions[i] });
+      }
+
       // hostname
       if (stateOptions[i].includes('HOSTNAME')) {
         setHostname(stateOptions[i].split(':')[1]);
@@ -181,6 +203,7 @@ export default function PageTwo() {
     setEachFileType(eachfiletype);
     setTotalFiles(totalfilenumber);
     setTotalAmountData(totalfilesize);
+    setProcessing(processsRunning);
   };
 
   const onClear = () => {
@@ -206,6 +229,19 @@ export default function PageTwo() {
     content = cleanContent(content);
     // … do something with the 'content' …
     setText(content);
+  };
+
+  const formatBytes = (bits, decimals = 2) => {
+    if (!+bits) return '0 Bytes';
+
+    const bytes = Math.floor(bits / 8);
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return `${parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
   };
 
   return (
@@ -266,8 +302,9 @@ export default function PageTwo() {
                     variant="body2"
                     color="textSecondary"
                     component="p"
+                    align="center"
                   >
-                    Discription
+                    {hostname}
                   </Typography>
                 </CardContent>
               </CardActionArea>
@@ -285,32 +322,336 @@ export default function PageTwo() {
                     color="textSecondary"
                     component="p"
                   >
-                    <Grid container spacing={3}>
-                      <Grid item sm={6}>
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          component="span"
+                    <br />
+                    <Grid container spacing={3} justifyContent="space-between">
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
                         >
-                          Targets in scope
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          component="span"
-                        >
-                          Discription
-                        </Typography>
+                          <Grid item xs={8}>
+                            <Typography variant="h6" component="h2">
+                              Targets in scope :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              1
+                            </Typography>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid item sm={6}>
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          component="p"
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
                         >
-                          Discription
-                        </Typography>
+                          <Grid item xs={8}>
+                            <Typography variant="h6" component="h2">
+                              successfully compromised :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              1
+                            </Typography>
+                          </Grid>
+                        </Grid>
                       </Grid>
+                    </Grid>
+                    <br />
+                    <Grid container spacing={3} justifyContent="space-between">
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={8}>
+                            <Typography variant="h6" component="h2">
+                              Files encrypted :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {totalFiles}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={8}>
+                            <Typography variant="h6" component="h2">
+                              Total file size encrypted :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {formatBytes(totalAmountData)}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    <br />
+                    <Grid container spacing={3} justifyContent="space-between">
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={8}>
+                            <Typography variant="h6" component="h2">
+                              Architecture :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {architecture}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={8}>
+                            <Typography variant="h6" component="h2">
+                              Processor Count :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {processorCount}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    <br />
+                    <Grid container spacing={3} justifyContent="space-between">
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={6}>
+                            <Typography variant="h6" component="h2">
+                              Domain :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {domain}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid item sm={6} xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={8}>
+                            <Typography variant="h6" component="h2">
+                              Time Taken :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {takeTime}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    <br />
+                    <Grid container spacing={3} justifyContent="space-between">
+                      <Grid item xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={3}>
+                            <Typography variant="h6" component="h2">
+                              Date Started :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {startDate}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Grid
+                          container
+                          spacing={3}
+                          justifyContent="space-between"
+                        >
+                          <Grid item xs={3}>
+                            <Typography variant="h6" component="h2">
+                              Date finished :
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={9}>
+                            <Typography
+                              variant="h6"
+                              color="Warning"
+                              component="span"
+                            >
+                              {endDate}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+          <Grid item sm={6} xs={12}>
+            <Card>
+              <CardActionArea>
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="h2">
+                    Total number of each file type
+                  </Typography>
+                  <Typography
+                    gutterBottom
+                    variant="h5"
+                    component="h2"
+                    className={classes.overScroll}
+                  >
+                    <Grid container spacing={3} justifyContent="space-between">
+                      {eachFileType.map((data) => (
+                        <Grid item xs={12} key={data.filetype}>
+                          <Grid
+                            container
+                            spacing={3}
+                            justifyContent="space-between"
+                          >
+                            <Grid item xs={8}>
+                              <Typography
+                                variant="h6"
+                                color="textSecondary"
+                                component="span"
+                              >
+                                {data.filetype}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Typography
+                                variant="h6"
+                                color="textSecondary"
+                                component="span"
+                              >
+                                {formatBytes(data.filesize)}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+          <Grid item sm={6} xs={12}>
+            <Card>
+              <CardActionArea>
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="h2">
+                    Process Running
+                  </Typography>
+                  <Typography
+                    gutterBottom
+                    variant="h5"
+                    component="h2"
+                    className={classes.overScroll}
+                  >
+                    <Grid container spacing={3} justifyContent="space-between">
+                      {processing.map((data) => (
+                        <Grid item xs={12} key={data.pid}>
+                          <Grid
+                            container
+                            spacing={3}
+                            justifyContent="space-between"
+                          >
+                            <Grid item xs={5}>
+                              <Typography
+                                variant="h6"
+                                color="textSecondary"
+                                component="span"
+                              >
+                                {data.pid}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={7}>
+                              <Typography
+                                variant="h6"
+                                color="textSecondary"
+                                component="span"
+                              >
+                                {data.running}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                      ))}
                     </Grid>
                   </Typography>
                 </CardContent>
@@ -319,23 +660,6 @@ export default function PageTwo() {
           </Grid>
         </Grid>
         {text && <pre>{text}</pre>}
-        {startDate}
-        <br />
-        {endDate}
-        <br />
-        {hostname}
-        <br />
-        {domain}
-        <br />
-        {processorCount}
-        <br />
-        {architecture}
-        <br />
-        {totalFiles}
-        <br />
-        {totalAmountData}
-        <br />
-        {takeTime}
       </Container>
     </Page>
   );

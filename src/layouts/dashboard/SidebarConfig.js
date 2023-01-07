@@ -24,15 +24,15 @@ const sidebarConfig = [
     subheader: 'general',
     items: [
       {
-        title: 'The Target Info',
+        title: 'Read File And Analyse',
         href: PATH_DASHBOARD.general.pageOne,
         icon: ICONS.page
-      },
-      {
-        title: 'Read File And Analyse',
-        href: PATH_DASHBOARD.general.pageTwo,
-        icon: ICONS.page
       }
+      // {
+      //   title: 'Read File And Analyse',
+      //   href: PATH_DASHBOARD.general.pageTwo,
+      //   icon: ICONS.page
+      // }
     ]
   }
 ];
